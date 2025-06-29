@@ -10,6 +10,8 @@
 // cross platform headers
 
 #include <stdint.h>
+#include <float.h>
+#include <math.h>
 
 // platform headers
 

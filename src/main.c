@@ -3,48 +3,45 @@
 #include <render/render.h>
 #include <platform/platform.h>
 
-static inline void draw(RenderContextId r, WindowId w)
-{
-	poll_events(w);
-
-	const uint16_t width = get_width(w);
-	const uint16_t height = get_height(w);
-
-	begin(r);
-
-	glMatrixMode(GL_PROJECTION);
-	glPushMatrix();
-	glLoadIdentity();
-	glOrtho(0, width, height, 0, -1, 1);
-	glClearColor(1.0f, 0.0f, 0.0f, 1.0f);
-	glClear(GL_COLOR_BUFFER_BIT);
-
-	glBegin(GL_TRIANGLES);
-
-	glColor4ub(255, 255, 255, 255);
-	glVertex2i(get_mouse_x(w), get_mouse_y(w));
-	glColor4ub(255, 0, 255, 255);
-	glVertex2i(100, 50);
-	glColor4ub(255, 255, 0, 255);
-	glVertex2i(75, 25);
-
-	glEnd();
-
-	end(r);
-}
-
 void entry()
 {
-	WindowId w1 = create_window(1280, 720, "hello world");
-	RenderContextId r1 = create_context(w1);
+	WindowId w = create_window(1280, 720, "hello world");
+	RenderContextId r = create_context(w);
 
-	WindowId w2 = create_window(1280, 720, "goodbye moon men");
-	RenderContextId r2 = create_context(w2);
+	MeshId m;
 
-	while (is_open(w1))
 	{
-		draw(r2, w2);
-		draw(r1, w1);
+		float xyz[] =
+		{ 
+			0.0f,  0.0f,   0.0f,
+			50.0f, 50.0f,  0.0f,
+			0.0f,  100.0f, 0.0f  
+		};
+
+		float uv[] = 
+		{
+			0.0f, 0.0f, 
+			0.0f, 0.0f,
+			0.0f, 0.0f
+		};
+
+		m = create_mesh(xyz, uv, 3, nullptr, 0);
+	}
+
+	while (is_open(w))
+	{	
+		poll_events(w);
+
+		begin(r);
+	
+		glMatrixMode(GL_PROJECTION);
+		glPushMatrix();
+		glLoadIdentity();
+		glOrtho(0, get_width(w), get_height(w), 0, -1, 1);
+	
+		render(m);
+	
+		end(r);
 	}
 
 	die(0);

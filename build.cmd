@@ -2,10 +2,12 @@
 setlocal EnableDelayedExpansion
 
 set FLAGS=-std=gnu2y ^
--nostdlib ^
--fuse-ld=lld ^
 -Iinclude ^
 -Isrc ^
+-nostdlib ^
+-fuse-ld=lld ^
+-fenable-matrix ^
+-Wno-undefined-internal ^
 -Xlinker -subsystem:windows
 
 clang src/main.c -o bin/trucksim.exe %FLAGS%

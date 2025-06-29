@@ -114,23 +114,22 @@ static inline WindowId create_window(uint16_t width, uint16_t height, const char
 		}
 	);
 
-	Window w = {};
+	WindowId id = fl_push(&windows, (Window){});
+	Window* w = fl_get(&windows, id);
 
-	w.open = true;
-	w.width = width;
-	w.height = height;
+	w->open = true;
+	w->width = width;
+	w->height = height;
 
-	w.handle = CreateWindowA(class.lpszClassName, title, WS_OVERLAPPEDWINDOW | WS_VISIBLE, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, nullptr, nullptr, nullptr, nullptr);
+	w->handle = CreateWindowA(class.lpszClassName, title, WS_OVERLAPPEDWINDOW | WS_VISIBLE, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, nullptr, nullptr, nullptr, nullptr);
 
-	if (!w.handle)
+	if (!w->handle)
 	{
 		MessageBoxA(nullptr, "fatal error", "", 0);
 		ExitProcess(0);
 	}
 
-	WindowId id = fl_push(&windows, w);
-
-	SetWindowLongPtrA(w.handle, GWLP_USERDATA, (LONG_PTR)fl_get(&windows, id));
+	SetWindowLongPtrA(w->handle, GWLP_USERDATA, (LONG_PTR)w);
 
 	return id;
 }
