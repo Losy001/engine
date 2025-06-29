@@ -1,0 +1,4 @@
+-std=gnu2y
+-Wno-undefined-internal
+-Iinclude
+-Isrc
