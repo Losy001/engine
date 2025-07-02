@@ -4,15 +4,10 @@ typedef struct
 {
 	HWND handle;
 
-	uint16_t width;
-	uint16_t height;
-
-	int16_t mouse_x;
-	int16_t mouse_y;
-
-	int16_t mouse_delta_x;
-	int16_t mouse_delta_y;
-
+	u16vec2 size;
+	i16vec2 mouse;
+	i16vec2 mouse_delta;
+	
 	bool open;
 } Window;
 
@@ -48,8 +43,7 @@ static inline __stdcall LRESULT wnd_proc(HWND hwnd, UINT msg, WPARAM wparam, LPA
 
 		case WM_MOUSEMOVE:
 		{
-			window->mouse_x = GET_X_LPARAM(lparam);
-			window->mouse_y = GET_Y_LPARAM(lparam);
+			window->mouse = (i16vec2){ GET_X_LPARAM(lparam), GET_Y_LPARAM(lparam) };
 		} break;
 
 		case WM_INPUT:
@@ -67,8 +61,7 @@ static inline __stdcall LRESULT wnd_proc(HWND hwnd, UINT msg, WPARAM wparam, LPA
 
 					if (raw_input->header.dwType == RIM_TYPEMOUSE)
 					{
-						window->mouse_delta_x = raw_input->data.mouse.lLastX;
-						window->mouse_delta_y = raw_input->data.mouse.lLastY;
+						window->mouse_delta = (i16vec2){ raw_input->data.mouse.lLastX, raw_input->data.mouse.lLastY };
 					}
 				}
 			}
@@ -76,8 +69,7 @@ static inline __stdcall LRESULT wnd_proc(HWND hwnd, UINT msg, WPARAM wparam, LPA
 
 		case WM_SIZE:
 		{
-			window->width = LOWORD(lparam);
-			window->height = HIWORD(lparam);
+			window->size = (u16vec2){ LOWORD(lparam), HIWORD(lparam) };
 		} break;
 
 		case WM_PAINT:
@@ -116,12 +108,11 @@ static inline WindowId create_window(uint16_t width, uint16_t height, const char
 
 	WindowId id = fl_push(&windows, (Window){});
 	Window* w = fl_get(&windows, id);
+	
+	w->size = (u16vec2){ width, height };
 
 	w->open = true;
-	w->width = width;
-	w->height = height;
-
-	w->handle = CreateWindowA(class.lpszClassName, title, WS_OVERLAPPEDWINDOW | WS_VISIBLE, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, nullptr, nullptr, nullptr, nullptr);
+	w->handle = CreateWindowA(class.lpszClassName, title, WS_OVERLAPPEDWINDOW | WS_VISIBLE, CW_USEDEFAULT, CW_USEDEFAULT, w->size.x, w->size.y, nullptr, nullptr, nullptr, nullptr);
 
 	if (!w->handle)
 	{
@@ -131,12 +122,31 @@ static inline WindowId create_window(uint16_t width, uint16_t height, const char
 
 	SetWindowLongPtrA(w->handle, GWLP_USERDATA, (LONG_PTR)w);
 
+	// device registration
+	RAWINPUTDEVICE rid[] = 
+	{
+		{
+			.usUsagePage = HID_USAGE_PAGE_GENERIC,
+			.usUsage = HID_USAGE_GENERIC_MOUSE,
+			.dwFlags = 0,
+			.hwndTarget = w->handle,
+		}
+	};
+
+	if (!RegisterRawInputDevices(rid, 1, sizeof(rid[0])))
+	{
+		MessageBoxA(nullptr, "fatal error", "", 0);
+		ExitProcess(0);
+	}
+
 	return id;
 }
 
 static inline void poll_events(WindowId w) 
 {
-	const Window* window = fl_get(&windows, w);
+	Window* window = fl_get(&windows, w);
+
+	window->mouse_delta = 0;
 
 	MSG msg;
 
@@ -164,22 +174,22 @@ static inline void* get_native_handle(WindowId w)
 	return fl_get(&windows, w)->handle;
 }
 
-static inline uint16_t get_width(WindowId w)
+static inline u16vec2 get_size(WindowId w)
 {
-	return fl_get(&windows, w)->width;
+	return fl_get(&windows, w)->size;
 }
 
-static inline uint16_t get_height(WindowId w)
+static inline i16vec2 get_mouse(WindowId w)
 {
-	return fl_get(&windows, w)->height;
+	return fl_get(&windows, w)->mouse;
 }
 
-static inline int16_t get_mouse_x(WindowId w)
+static inline i16vec2 get_mouse_delta(WindowId w)
 {
-	return fl_get(&windows, w)->mouse_x;
+	return fl_get(&windows, w)->mouse_delta;
 }
 
-static inline int16_t get_mouse_y(WindowId w)
+static inline bool is_key_down(uint16_t k)
 {
-	return fl_get(&windows, w)->mouse_y;
+	return (1 << 15) & GetAsyncKeyState(k);
 }

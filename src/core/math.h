@@ -2,15 +2,6 @@
 
 #include <core/core.h>
 
-typedef uint32_t uvec2 __attribute__((ext_vector_type(2)));
-typedef int32_t ivec2 __attribute__((ext_vector_type(2)));
-typedef float vec2 __attribute__((ext_vector_type(2)));
-typedef float vec3 __attribute__((ext_vector_type(3)));
-typedef float vec4 __attribute__((ext_vector_type(4)));
-typedef uint8_t u8vec4 __attribute__((ext_vector_type(4)));
-typedef float mat4 __attribute__((matrix_type(4, 4)));
-typedef float quat __attribute__((ext_vector_type(4)));
-
 static constexpr float INF = __builtin_inff();
 static constexpr float PI = 3.141592653589793238462643383f;
 static constexpr float TAU = 6.283185307179586f;
@@ -341,23 +332,23 @@ static inline mat4 ortho(float left, float right, float bottom, float top, float
 	float r = 1.0f / (z_far - z_near);
 	
 	mat[0][0] = 2.0f / (right - left);
-	mat[0][1] = 0.0f;
-	mat[0][2] = 0.0f;
-	mat[0][3] = 0.0f;
-
 	mat[1][0] = 0.0f;
-	mat[1][1] = 2.0f / (top - bottom);
-	mat[1][2] = 0.0f;
-	mat[1][3] = 0.0f;
-
 	mat[2][0] = 0.0f;
+	mat[3][0] = 0.0f;
+
+	mat[0][1] = 0.0f;
+	mat[1][1] = 2.0f / (top - bottom);
 	mat[2][1] = 0.0f;
+	mat[3][1] = 0.0f;
+
+	mat[0][2] = 0.0f;
+	mat[1][2] = 0.0f;
 	mat[2][2] = r;
-	mat[2][3] = 0.0f;
+	mat[3][2] = 0.0f;
 	
-	mat[3][0] = -(right + left) / (right - left);
-	mat[3][1] = -(top + bottom) / (top - bottom);
-	mat[3][2] = -r * z_near;
+	mat[0][3] = -(right + left) / (right - left);
+	mat[1][3] = -(top + bottom) / (top - bottom);
+	mat[2][3] = -r * z_near;
 	mat[3][3] = 1.0f;
 
 	return mat;
@@ -366,7 +357,7 @@ static inline mat4 ortho(float left, float right, float bottom, float top, float
 [[clang::overloadable]] 
 static inline mat4 perspective(float fov, float aspect_ratio, float z_near) 
 {
-	float f = 1.0f / tanf(fov * 0.5f);
+	float f = 1.0f / tanf(radians(fov) * 0.5f);
 	
 	mat4 mat;
 
