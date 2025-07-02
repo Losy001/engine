@@ -93,18 +93,21 @@ static inline void entry()
 		camera.yaw -= radians(delta.x * 0.1f);
 		camera.pitch -= radians(delta.y * 0.1f);
 	
-		camera.yaw = __builtin_fmodf(camera.yaw, TAU);
+		camera.yaw = fmodf(camera.yaw, TAU);
 		camera.pitch = clamp(camera.pitch, radians(-89.0f), radians(89.0f));
 
 		poll_events(window);
 
 		begin(rc);
 
-		begin_3d(rc, &camera);
+		begin_3d(rc, camera);
 
-		render(mesh, texture, rotate_y(x));
+		render(mesh, texture, rotate_x(radians(90.0f)));
+		render(mesh, texture, rotate_x(radians(90.0f)) * translate(5.0f));
 	
 		end_3d(rc);
+
+		render(mesh, texture, identity());
 
 		end(rc);
 	}

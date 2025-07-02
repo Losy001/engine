@@ -24,6 +24,7 @@ static inline void begin(RenderContextId render_context);
 
 static inline void end(RenderContextId render_context);
 
-static inline void begin_3d(RenderContextId render_context, const Camera* camera);
+static inline void begin_3d(RenderContextId render_context, Camera camera);
 
 static inline void end_3d(RenderContextId render_context);
+

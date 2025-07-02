@@ -41,6 +41,9 @@ static FreeList(Texture, MAX_TEXTURES) textures = fl_default();
 static FreeList(Mesh, MAX_MESHES) meshes = fl_default();
 static FreeList(RenderContext, MAX_RENDER_CONTEXTS) render_contexts = fl_default();
 
+// begin_3d provides the data
+static Camera current_camera;
+
 //
 // texture
 //
@@ -119,7 +122,12 @@ static inline void render(MeshId mesh, TextureId texture, mat4 transform)
 {
 	use(texture);
 
-	mul(GL_MODELVIEW, transform);
+	const mat4 m = rotate_x(current_camera.pitch) 
+		* rotate_y(current_camera.yaw) 
+		* translate(-current_camera.position)
+		* transform;
+
+	load(GL_MODELVIEW, m);
 
 	glCallList(fl_get(&meshes, mesh)->id);
 }
@@ -158,15 +166,21 @@ static inline RenderContextId create_context(WindowId w)
 		rc->glrc = wglCreateContext(rc->dc);
 		wglMakeCurrent(rc->dc, rc->glrc);
 	
-		// TODO: move this somewhere else?
-		if (!wglSwapIntervalEXT)
-		{
+		do_once
+		(
 			wglSwapIntervalEXT = (PFNWGLSWAPINTERVALPROC)wglGetProcAddress("wglSwapIntervalEXT");
 			wglSwapIntervalEXT(1);
-		}
+		);
 	#endif
 
+	glEnable(GL_BLEND);
 	glEnable(GL_DEPTH_TEST);
+	glDepthFunc(GL_GREATER);
+	glClearDepth(0.0f);
+
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	
+	//glCullFace(GL_BACK);
 
 	return id;
 }
@@ -194,9 +208,10 @@ static inline void begin(RenderContextId render_context)
 
 	glViewport(0, 0, size.x, size.y);
 	glClearColor(1.0f, 0.0f, 0.0f, 1.0f);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
 	load(GL_PROJECTION, ortho(0.0f, size.x, size.y, 0.0f, -1.0f, 1.0f));
+	load(GL_MODELVIEW, identity());
 }
 
 static inline void end(RenderContextId render_context)
@@ -209,21 +224,26 @@ static inline void end(RenderContextId render_context)
 	#endif
 }
 
-static inline void begin_3d(RenderContextId render_context, const Camera* camera)
+static inline void begin_3d(RenderContextId render_context, Camera camera)
 {
+	current_camera = camera;
+
 	const RenderContext* rc = fl_get(&render_contexts, render_context);
 
 	const u16vec2 size = get_size(rc->window);
 
-	load(GL_PROJECTION, perspective(camera->fov, (float)size.x / (float)size.y, 0.01f));
-	load(GL_MODELVIEW, rotate_x(camera->pitch) * rotate_y(camera->yaw) * translate(-camera->position));
+	load(GL_PROJECTION, perspective(current_camera.fov, (float)size.x / (float)size.y, 0.01f));
+	load(GL_MODELVIEW, rotate_x(current_camera.pitch) * rotate_y(current_camera.yaw) * translate(-current_camera.position));
 }
 
 static inline void end_3d(RenderContextId render_context)
 {
+	current_camera = (Camera){};
+
 	const RenderContext* rc = fl_get(&render_contexts, render_context);
 	
 	const u16vec2 size = get_size(rc->window);	
 	
 	load(GL_PROJECTION, ortho(0.0f, size.x, size.y, 0.0f, -1.0f, 1.0f));
+	load(GL_MODELVIEW, identity());
 }
