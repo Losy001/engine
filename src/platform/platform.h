@@ -14,3 +14,5 @@ typedef enum : uint8_t
 static inline void die(int32_t code);
 
 static inline void message_box(const char* title, const char* message, MessageBoxFlags f);
+
+static inline void write_console(const char* fmt, ...);

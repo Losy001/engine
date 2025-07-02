@@ -3,6 +3,8 @@
 #include <render/render.h>
 #include <platform/platform.h>
 
+#include <core/log.h>
+
 static inline void entry()
 {
 	WindowId window = create_window(1280, 720, "hello world");
@@ -10,12 +12,12 @@ static inline void entry()
 
 	float xyz[] =
 	{ 
-		0.0f,  5.0f, 0.0f, 
-		0.0f,  0.0f, 50.0f,
-		50.0f, 0.0f, 50.0f,
-		50.0f, 0.0f, 50.0f,
-		50.0f, 0.0f, 0.0f,
-		0.0f, 5.0f, 0.0f
+		0.0f,  0.0f,  0.0f,
+		0.0f,  50.0f, 0.0f,
+		50.0f, 50.0f, 0.0f,
+		50.0f, 50.0f, 0.0f,
+		50.0f, 0.0f,  0.0f,
+		0.0f,  0.0f,  0.0f,
 	};
 
 	float uv[] = 
@@ -40,8 +42,12 @@ static inline void entry()
 
 	Camera camera = { .fov = 75.0f, .position = { 0.0f, 1.0f, 0.0f } };
 
+	float x = 0.0f;
+
 	while (is_open(window))
 	{	
+		x += 0.01f;
+
 		// camera movement
 		float sy = sinf(camera.yaw);
 		float cy = cosf(camera.yaw);
@@ -96,7 +102,7 @@ static inline void entry()
 
 		begin_3d(rc, &camera);
 
-		render(mesh, texture, identity());
+		render(mesh, texture, rotate_y(x));
 	
 		end_3d(rc);
 
