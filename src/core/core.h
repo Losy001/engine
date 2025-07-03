@@ -59,7 +59,6 @@ typedef float mat4 __attribute__((matrix_type(4, 4)));
 
 static inline void entry();
 
-
 #if defined _WIN32
 	#if defined DEBUG
 		#define ENTRY_POINT void mainCRTStartup()

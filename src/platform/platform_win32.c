@@ -23,3 +23,13 @@ static inline void write_console(const char* fmt, ...)
 
 	WriteConsoleA(GetStdHandle(STD_OUTPUT_HANDLE), out, r, nullptr, nullptr);
 }
+
+static inline void get_error_msg(int32_t err, char* out, size_t n)
+{
+	FormatMessageA(FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS, nullptr, err, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), out, n, nullptr);
+}
+
+static inline int32_t get_last_error()
+{
+	return GetLastError();
+}

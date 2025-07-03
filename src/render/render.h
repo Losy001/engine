@@ -2,6 +2,7 @@
 
 #include <core/core.h>
 #include <core/math.h>
+#include <core/log.h>
 
 #include <utils/free_list.h>
 #include <utils/macros.h>
@@ -20,11 +21,16 @@ static inline RenderContextId create_context(WindowId window);
 
 static inline void destroy_context(RenderContextId render_context);
 
+static inline void clear_background(vec4 tint);
+
 static inline void begin(RenderContextId render_context);
 
-static inline void end(RenderContextId render_context);
+static inline void end();
 
-static inline void begin_3d(RenderContextId render_context, Camera camera);
+static inline void begin_3d(Camera camera);
 
-static inline void end_3d(RenderContextId render_context);
+static inline void end_3d();
 
+static inline void resize_viewport(RenderContextId render_context);
+
+static inline RenderContextId get_current_context();

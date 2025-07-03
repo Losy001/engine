@@ -8,6 +8,9 @@ typedef struct
 	i16vec2 mouse;
 	i16vec2 mouse_delta;
 	
+	WindowResizeCb on_resize;
+	WindowPaintCb on_paint;
+
 	bool open;
 } Window;
 
@@ -15,9 +18,9 @@ static FreeList(Window, MAX_WINDOWS) windows = fl_default();
 
 static inline __stdcall LRESULT wnd_proc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam) 
 {
-	Window* window = (Window*)GetWindowLongPtrA(hwnd, GWLP_USERDATA);
+	Window* w = (Window*)GetWindowLongPtrA(hwnd, GWLP_USERDATA);
 
-	if (!window)
+	if (!w)
 	{
 		return DefWindowProcA(hwnd, msg, wparam, lparam);
 	}
@@ -33,7 +36,7 @@ static inline __stdcall LRESULT wnd_proc(HWND hwnd, UINT msg, WPARAM wparam, LPA
 		{
 			PostQuitMessage(0);
 			DestroyWindow(hwnd);
-			window->open = false;
+			w->open = false;
 		} break;
 
 		case WM_ERASEBKGND:
@@ -43,7 +46,7 @@ static inline __stdcall LRESULT wnd_proc(HWND hwnd, UINT msg, WPARAM wparam, LPA
 
 		case WM_MOUSEMOVE:
 		{
-			window->mouse = (i16vec2){ GET_X_LPARAM(lparam), GET_Y_LPARAM(lparam) };
+			w->mouse = (i16vec2){ GET_X_LPARAM(lparam), GET_Y_LPARAM(lparam) };
 		} break;
 
 		case WM_INPUT:
@@ -61,7 +64,7 @@ static inline __stdcall LRESULT wnd_proc(HWND hwnd, UINT msg, WPARAM wparam, LPA
 
 					if (raw_input->header.dwType == RIM_TYPEMOUSE)
 					{
-						window->mouse_delta = (i16vec2){ raw_input->data.mouse.lLastX, raw_input->data.mouse.lLastY };
+						w->mouse_delta = (i16vec2){ raw_input->data.mouse.lLastX, raw_input->data.mouse.lLastY };
 					}
 				}
 			}
@@ -69,12 +72,25 @@ static inline __stdcall LRESULT wnd_proc(HWND hwnd, UINT msg, WPARAM wparam, LPA
 
 		case WM_SIZE:
 		{
-			window->size = (u16vec2){ LOWORD(lparam), HIWORD(lparam) };
-		} break;
+			w->size = (u16vec2){ LOWORD(lparam), HIWORD(lparam) };
+			
+			if (w->on_resize)
+			{
+				w->on_resize(w->size.x, w->size.y);
+			}
+
+			PostMessageA(hwnd, WM_PAINT, 0, 0);
+		};
 
 		case WM_PAINT:
 		{
 			PAINTSTRUCT ps;
+			
+			if (w->on_paint)
+			{
+				w->on_paint();
+			}
+			
 			BeginPaint(hwnd, &ps);
 			EndPaint(hwnd, &ps);
 		} break;
@@ -101,8 +117,10 @@ static inline WindowId create_window(uint16_t width, uint16_t height, const char
 		
 		if (!RegisterClassA(&class))
 		{
-			MessageBoxA(nullptr, "fatal error", "", 0);
-			ExitProcess(0);
+			char err[512];
+			get_error_msg(get_last_error(), err, 512);
+
+			LOG_FATAL("class registration failure.\nreason: %s", err);
 		}
 	);
 
@@ -116,13 +134,14 @@ static inline WindowId create_window(uint16_t width, uint16_t height, const char
 
 	if (!w->handle)
 	{
-		MessageBoxA(nullptr, "fatal error", "", 0);
-		ExitProcess(0);
+		char err[512];
+		get_error_msg(get_last_error(), err, 512);
+
+		LOG_FATAL("window creation failure.\nreason: %s", err);
 	}
 
 	SetWindowLongPtrA(w->handle, GWLP_USERDATA, (LONG_PTR)w);
 
-	// device registration
 	RAWINPUTDEVICE rid[] = 
 	{
 		{
@@ -135,22 +154,24 @@ static inline WindowId create_window(uint16_t width, uint16_t height, const char
 
 	if (!RegisterRawInputDevices(rid, 1, sizeof(rid[0])))
 	{
-		MessageBoxA(nullptr, "fatal error", "", 0);
-		ExitProcess(0);
+		char err[512];
+		get_error_msg(get_last_error(), err, 512);
+
+		LOG_FATAL("raw input registration failure.\nReason: %s", err);
 	}
 
 	return id;
 }
 
-static inline void poll_events(WindowId w) 
+static inline void poll_events(WindowId window) 
 {
-	Window* window = fl_get(&windows, w);
+	Window* w = fl_get(&windows, window);
 
-	window->mouse_delta = 0;
+	w->mouse_delta = 0;
 
 	MSG msg;
 
-	while (PeekMessageA(&msg, window->handle, 0, 0, PM_REMOVE))
+	while (PeekMessageA(&msg, w->handle, 0, 0, PM_REMOVE))
 	{
 		if (msg.message == WM_CLOSE)
 		{
@@ -164,32 +185,52 @@ static inline void poll_events(WindowId w)
 	}
 }
 
-static inline bool is_open(WindowId w)
+static inline bool is_open(WindowId window)
 {
-	return fl_get(&windows, w)->open;
+	return fl_get(&windows, window)->open;
 }
 
-static inline void* get_native_handle(WindowId w)
+static inline void* get_native_handle(WindowId window)
 {
-	return fl_get(&windows, w)->handle;
+	return fl_get(&windows, window)->handle;
 }
 
-static inline u16vec2 get_size(WindowId w)
+static inline u16vec2 get_size(WindowId window)
 {
-	return fl_get(&windows, w)->size;
+	return fl_get(&windows, window)->size;
 }
 
-static inline i16vec2 get_mouse(WindowId w)
+static inline i16vec2 get_mouse(WindowId window)
 {
-	return fl_get(&windows, w)->mouse;
+	return fl_get(&windows, window)->mouse;
 }
 
-static inline i16vec2 get_mouse_delta(WindowId w)
+static inline i16vec2 get_mouse_delta(WindowId window)
 {
-	return fl_get(&windows, w)->mouse_delta;
+	return fl_get(&windows, window)->mouse_delta;
 }
 
-static inline bool is_key_down(uint16_t k)
+static inline bool is_active(WindowId window)
 {
-	return (1 << 15) & GetAsyncKeyState(k);
+	return GetForegroundWindow() == fl_get(&windows, window)->handle;
+}
+
+static inline bool is_key_down(WindowId window, uint16_t k)
+{
+	if (is_active(window))
+	{
+		return (1 << 15) & GetAsyncKeyState(k);
+	}
+
+	return false;
+}
+
+static inline void set_resize_cb(WindowId window, WindowResizeCb cb)
+{
+	fl_get(&windows, window)->on_resize = cb;
+}
+
+static inline void set_paint_cb(WindowId window, WindowPaintCb cb)
+{
+	fl_get(&windows, window)->on_paint = cb;
 }

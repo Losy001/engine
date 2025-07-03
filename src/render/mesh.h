@@ -10,4 +10,4 @@ typedef enum MeshId : uint16_t MeshId;
 
 static inline MeshId create_mesh(const float* xyz, const float* uv, size_t vertex_count, uint32_t* indices, size_t index_count);
 
-static inline void render(MeshId mesh, TextureId texture, mat4 transform);
+static inline void render(MeshId mesh, TextureId texture, vec4 tint, mat4 transform);

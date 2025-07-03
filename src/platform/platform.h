@@ -16,3 +16,7 @@ static inline void die(int32_t code);
 static inline void message_box(const char* title, const char* message, MessageBoxFlags f);
 
 static inline void write_console(const char* fmt, ...);
+
+static inline void get_error_msg(int32_t err, char* out, size_t n);
+
+static inline int32_t get_last_error();
