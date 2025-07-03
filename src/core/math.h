@@ -6,26 +6,26 @@ static constexpr float INF = __builtin_inff();
 static constexpr float PI = 3.141592653589793238462643383f;
 static constexpr float TAU = 6.283185307179586f;
 
-[[clang::overloadable]] 
+[[clang::overloadable]]
 static inline float degrees(float rad) 
 {
 	return rad * 180.0f / PI;
 }
 
-[[clang::overloadable]] 
+[[clang::overloadable]]
 static inline float radians(float deg) 
 {
 	return deg * PI / 180.0f;
 }
 
-[[clang::overloadable]] 
+[[clang::overloadable]]
 static inline double clamp(double d, double min, double max)
 {
 	const double t = d < min ? min : d;
 	return t > max ? max : t;
 }
 
-[[clang::overloadable]] 
+[[clang::overloadable]]
 static inline vec3 cross(vec3 a, vec3 b) 
 {
 	return (vec3){ 
@@ -47,31 +47,31 @@ static inline float dot(quat a, quat b)
 	return a.x * b.x + a.y * b.y + a.z * b.z + a.w * b.w;
 }
 
-[[clang::overloadable]] 
+[[clang::overloadable]]
 static inline float length(quat v) 
 {
 	return sqrtf(v.x * v.x + v.y * v.y + v.z * v.z + v.w * v.w);
 }
 
-[[clang::overloadable]] 
+[[clang::overloadable]]
 static inline float length(vec3 v) 
 {
 	return sqrtf(v.x * v.x + v.y * v.y + v.z * v.z);
 }
 
-[[clang::overloadable]] 
+[[clang::overloadable]]
 static inline float length(vec2 v) 
 {
 	return sqrtf(v.x * v.x + v.y * v.y);
 }
 
-[[clang::overloadable]] 
+[[clang::overloadable]]
 static inline vec3 normalize(vec3 v) 
 {
 	return v / length(v);
 }
 
-[[clang::overloadable]] 
+[[clang::overloadable]]
 static inline vec2 normalize(vec2 v) 
 {
 	return v / length(v);
@@ -83,7 +83,7 @@ static inline quat normalize(quat v)
 	return v / length(v);
 }
 
-[[clang::overloadable]] 
+[[clang::overloadable]]
 static inline float distance(vec3 a, vec3 b)
 {
 	return length(b - a);
@@ -151,7 +151,7 @@ static inline float inv_lerp(float from, float to, float value)
 	return (value - from) / (to - from);
 }
 
-[[clang::overloadable]] 
+[[clang::overloadable]]
 static inline mat4 identity(void) 
 {
 	mat4 mat;
@@ -179,7 +179,7 @@ static inline mat4 identity(void)
 	return mat;
 }
 
-[[clang::overloadable]] 
+[[clang::overloadable]]
 static inline mat4 rotate_x(float x) 
 {
 	mat4 mat = identity();
@@ -195,7 +195,7 @@ static inline mat4 rotate_x(float x)
 	return mat;
 }
 
-[[clang::overloadable]] 
+[[clang::overloadable]]
 static inline mat4 rotate_y(float y) 
 {
 	mat4 mat = identity();
@@ -211,7 +211,7 @@ static inline mat4 rotate_y(float y)
 	return mat;
 }
 
-[[clang::overloadable]] 
+[[clang::overloadable]]
 static inline mat4 rotate_z(float z) 
 {
 	mat4 mat = identity();
@@ -227,13 +227,13 @@ static inline mat4 rotate_z(float z)
 	return mat;
 }
 
-[[clang::overloadable]] 
+[[clang::overloadable]]
 static inline mat4 rotate(vec3 angle) 
 {
 	return rotate_x(angle.x) * rotate_y(angle.y) * rotate_z(angle.z);
 }
 
-[[clang::overloadable]] 
+[[clang::overloadable]]
 static inline mat4 rotate(quat q)
 {
 	mat4 mat = identity();
@@ -259,7 +259,7 @@ static inline mat4 rotate(quat q)
 	return mat;
 }
 
-[[clang::overloadable]] 
+[[clang::overloadable]]
 static inline mat4 scale(vec3 s) 
 {
 	mat4 mat = identity();
@@ -271,7 +271,7 @@ static inline mat4 scale(vec3 s)
 	return mat;
 }
 
-[[clang::overloadable]] 
+[[clang::overloadable]]
 static inline mat4 translate(vec3 v) 
 {
 	mat4 mat = identity();
@@ -318,13 +318,13 @@ static inline mat4 rts(quat r, vec3 t, vec3 s)
 	return mat;
 }
 
-[[clang::overloadable]] 
+[[clang::overloadable]]
 static inline mat4 transpose(mat4 mat) 
 {
 	return __builtin_matrix_transpose(mat);
 }
 
-[[clang::overloadable]] 
+[[clang::overloadable]]
 static inline mat4 ortho(float left, float right, float bottom, float top, float z_near, float z_far)
 {
 	mat4 mat;
@@ -354,7 +354,7 @@ static inline mat4 ortho(float left, float right, float bottom, float top, float
 	return mat;
 }
 
-[[clang::overloadable]] 
+[[clang::overloadable]]
 static inline mat4 perspective(float fov, float aspect_ratio, float z_near) 
 {
 	float f = 1.0f / tanf(radians(fov) * 0.5f);

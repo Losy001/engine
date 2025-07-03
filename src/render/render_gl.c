@@ -57,6 +57,7 @@ static struct
 // texture
 //
 
+[[clang::overloadable]]
 static inline TextureId create_texture(uint16_t width, uint16_t height, uint32_t *pixels, TextureFormat format)
 {
 	TextureId id = fl_push(&textures, (Texture){});
@@ -77,6 +78,7 @@ static inline TextureId create_texture(uint16_t width, uint16_t height, uint32_t
 	return id;
 }
 
+[[clang::overloadable]]
 static inline void destroy_texture(TextureId texture)
 {
 	const Texture* t = fl_get(&textures, texture);
@@ -86,11 +88,13 @@ static inline void destroy_texture(TextureId texture)
 	fl_remove(&textures, texture);
 }
 
+[[clang::overloadable]]
 static inline void use(TextureId texture)
 {
 	glBindTexture(GL_TEXTURE_2D, fl_get(&textures, texture)->id);
 }
 
+[[clang::overloadable]]
 static inline void update(TextureId texture, uint16_t width, uint16_t height, uint32_t* pixels, TextureFormat format)
 {
 	Texture* t = fl_get(&textures, texture);
@@ -105,6 +109,7 @@ static inline void update(TextureId texture, uint16_t width, uint16_t height, ui
 // mesh
 //
 
+[[clang::overloadable]]
 static inline MeshId create_mesh(const float* xyz, const float* uv, size_t vertex_count, uint32_t* indices, size_t index_count)
 {
 	MeshId id = fl_push(&meshes, (Mesh){});
@@ -137,6 +142,7 @@ static inline MeshId create_mesh(const float* xyz, const float* uv, size_t verte
 	return id;
 }
 
+[[clang::overloadable]]
 static inline void render(MeshId mesh, TextureId texture, vec4 tint, mat4 transform)
 {
 	use(texture);
@@ -164,6 +170,7 @@ static inline void render(MeshId mesh, TextureId texture, vec4 tint, mat4 transf
 	static PFNWGLSWAPINTERVALPROC wglSwapIntervalEXT;
 #endif
 
+[[clang::overloadable]]
 static inline RenderContextId create_context(WindowId window)
 {
 	RenderContextId id = fl_push(&render_contexts, (RenderContext){});
@@ -189,7 +196,7 @@ static inline RenderContextId create_context(WindowId window)
 		do_once
 		(
 			wglSwapIntervalEXT = (PFNWGLSWAPINTERVALPROC)wglGetProcAddress("wglSwapIntervalEXT");
-			wglSwapIntervalEXT(1);
+			//wglSwapIntervalEXT(1);
 		);
 	#endif
 
@@ -206,6 +213,7 @@ static inline RenderContextId create_context(WindowId window)
 	return id;
 }
 
+[[clang::overloadable]]
 static inline void destroy_context(RenderContextId render_context)
 {
 	const RenderContext* rc = fl_get(&render_contexts, render_context);
@@ -218,12 +226,14 @@ static inline void destroy_context(RenderContextId render_context)
 	fl_remove(&render_contexts, render_context);
 }
 
+[[clang::overloadable]]
 static inline void clear_background(vec4 tint)
 {
 	glClearColor(tint.r, tint.g, tint.b, tint.a);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 }
 
+[[clang::overloadable]]
 static inline void begin(RenderContextId render_context)
 {
 	const RenderContext* rc;
@@ -247,6 +257,7 @@ static inline void begin(RenderContextId render_context)
 	load(GL_MODELVIEW, identity());
 }
 
+[[clang::overloadable]]
 static inline void end()
 {
 	if (current.context == (RenderContextId)-1)
@@ -263,6 +274,7 @@ static inline void end()
 	#endif
 }
 
+[[clang::overloadable]]
 static inline void begin_3d(Camera camera)
 {
 	current.is_3d = true;
@@ -275,6 +287,7 @@ static inline void begin_3d(Camera camera)
 	load(GL_MODELVIEW, rotate_x(current.camera.pitch) * rotate_y(current.camera.yaw) * translate(-current.camera.position));
 }
 
+[[clang::overloadable]]
 static inline void end_3d()
 {
 	if (!current.is_3d)
@@ -292,6 +305,7 @@ static inline void end_3d()
 	load(GL_MODELVIEW, identity());
 }
 
+[[clang::overloadable]]
 static inline void resize_viewport(RenderContextId render_context)
 {
 	const RenderContext* rc = fl_get(&render_contexts, render_context);
@@ -309,6 +323,7 @@ static inline void resize_viewport(RenderContextId render_context)
 	}
 }
 
+[[clang::overloadable]]
 static inline RenderContextId get_current_context()
 {
 	return current.context;

@@ -2,14 +2,17 @@
 
 typedef struct 
 {
-	HWND handle;
+	WindowId id;
+
+	#if defined _WIN32
+		HWND handle;
+	#endif
 
 	u16vec2 size;
 	i16vec2 mouse;
 	i16vec2 mouse_delta;
 	
 	WindowResizeCb on_resize;
-	WindowPaintCb on_paint;
 
 	bool open;
 } Window;
@@ -76,21 +79,14 @@ static inline __stdcall LRESULT wnd_proc(HWND hwnd, UINT msg, WPARAM wparam, LPA
 			
 			if (w->on_resize)
 			{
-				w->on_resize(w->size.x, w->size.y);
+				w->on_resize(w->id);
 			}
 
-			PostMessageA(hwnd, WM_PAINT, 0, 0);
-		};
+		} break;
 
 		case WM_PAINT:
 		{
 			PAINTSTRUCT ps;
-			
-			if (w->on_paint)
-			{
-				w->on_paint();
-			}
-			
 			BeginPaint(hwnd, &ps);
 			EndPaint(hwnd, &ps);
 		} break;
@@ -106,6 +102,7 @@ static inline __stdcall LRESULT wnd_proc(HWND hwnd, UINT msg, WPARAM wparam, LPA
 
 static WNDCLASSA class;
 
+[[clang::overloadable]]
 static inline WindowId create_window(uint16_t width, uint16_t height, const char* title)
 {
 	do_once 
@@ -128,7 +125,7 @@ static inline WindowId create_window(uint16_t width, uint16_t height, const char
 	Window* w = fl_get(&windows, id);
 	
 	w->size = (u16vec2){ width, height };
-
+	w->id = id;
 	w->open = true;
 	w->handle = CreateWindowA(class.lpszClassName, title, WS_OVERLAPPEDWINDOW | WS_VISIBLE, CW_USEDEFAULT, CW_USEDEFAULT, w->size.x, w->size.y, nullptr, nullptr, nullptr, nullptr);
 
@@ -163,6 +160,7 @@ static inline WindowId create_window(uint16_t width, uint16_t height, const char
 	return id;
 }
 
+[[clang::overloadable]]
 static inline void poll_events(WindowId window) 
 {
 	Window* w = fl_get(&windows, window);
@@ -185,36 +183,43 @@ static inline void poll_events(WindowId window)
 	}
 }
 
+[[clang::overloadable]]
 static inline bool is_open(WindowId window)
 {
 	return fl_get(&windows, window)->open;
 }
 
+[[clang::overloadable]]
 static inline void* get_native_handle(WindowId window)
 {
 	return fl_get(&windows, window)->handle;
 }
 
+[[clang::overloadable]]
 static inline u16vec2 get_size(WindowId window)
 {
 	return fl_get(&windows, window)->size;
 }
 
+[[clang::overloadable]]
 static inline i16vec2 get_mouse(WindowId window)
 {
 	return fl_get(&windows, window)->mouse;
 }
 
+[[clang::overloadable]]
 static inline i16vec2 get_mouse_delta(WindowId window)
 {
 	return fl_get(&windows, window)->mouse_delta;
 }
 
+[[clang::overloadable]]
 static inline bool is_active(WindowId window)
 {
 	return GetForegroundWindow() == fl_get(&windows, window)->handle;
 }
 
+[[clang::overloadable]]
 static inline bool is_key_down(WindowId window, uint16_t k)
 {
 	if (is_active(window))
@@ -225,12 +230,8 @@ static inline bool is_key_down(WindowId window, uint16_t k)
 	return false;
 }
 
-static inline void set_resize_cb(WindowId window, WindowResizeCb cb)
+[[clang::overloadable]]
+static inline void set_on_resize(WindowId window, WindowResizeCb cb)
 {
 	fl_get(&windows, window)->on_resize = cb;
-}
-
-static inline void set_paint_cb(WindowId window, WindowPaintCb cb)
-{
-	fl_get(&windows, window)->on_paint = cb;
 }
