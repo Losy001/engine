@@ -5,10 +5,13 @@
 
 #include <core/log.h>
 
+#include <webp.h>
+
 static Camera camera;
 
 static WindowId window;
 static RenderContextId rc;
+
 static MeshId mesh;
 static TextureId texture;
 
@@ -110,8 +113,18 @@ static inline void on_resize(WindowId window)
 	loop();
 }
 
+static constexpr uint8_t webp[] = 
+{
+	#embed "../res/tux.webp"
+};
+
 static inline void entry()
 {
+	static uint32_t pixels[1024 * 1024];
+	uint16_t w, h;
+
+	load_webp(webp, pixels, &w, &h);
+
 	window = create_window(1280, 720, "hello world");
 	rc = create_context(window);
 
@@ -140,13 +153,7 @@ static inline void entry()
 
 	mesh = create_mesh(xyz, uv, 6, nullptr, 0);
 
-	uint32_t pixels[] =
-	{
-		0xFFFF00FF, 0xFFFFFFFF,
-		0xFFFFFFFF, 0xFFFF00FF
-	};
 
-	texture = create_texture(2, 2, pixels, TEXTURE_FORMAT_RGBA);
 
 	camera.fov = 75.0f; 
 	camera.position = (vec3){ 0.0f, 1.0f, 0.0f };

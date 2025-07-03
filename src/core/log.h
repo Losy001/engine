@@ -13,7 +13,7 @@ typedef enum : uint8_t
 
 static inline void trace_log_impl(LogLevel l, const char* file, uint32_t line, const char* fmt, ...)
 {
-	char out[2048];
+	char out[2048] = {};
 	
 	switch (l) 
 	{
@@ -43,6 +43,7 @@ static inline void trace_log_impl(LogLevel l, const char* file, uint32_t line, c
 		{
 			strcat(out, "\nThe process is terminating."),
 			message_box("FATAL", out, MESSAGE_BOX_ICON_ERROR);
+			die(1);
 		} break;
 	}
 }
