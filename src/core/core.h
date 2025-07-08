@@ -9,6 +9,7 @@
 
 // cross platform headers
 
+#include <stddef.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <float.h>
@@ -37,8 +38,6 @@ typedef float mat4 __attribute__((matrix_type(4, 4)));
 	#include <windows.h>
 	#include <windowsx.h>
 	#include <hidusage.h>
-
-	#include <gl/GL.h>
 #endif
 
 // platform libraries

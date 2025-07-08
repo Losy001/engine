@@ -6,7 +6,7 @@
 #include <utils/free_list.h>
 #include <utils/macros.h>
 
-static constexpr uint16_t MAX_WINDOWS = 16;
+static constexpr uint16_t MAX_WINDOWS = 4;
 
 typedef enum WindowId : uint16_t WindowId;
 

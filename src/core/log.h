@@ -31,6 +31,8 @@ static inline void trace_log_impl(LogLevel l, const char* file, uint32_t line, c
 	
 	va_end(args);
 
+	strcat(out, "\n");
+
 	switch (l) 
 	{
 		case LOG_INFO: 
