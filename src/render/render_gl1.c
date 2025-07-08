@@ -9,10 +9,6 @@
 #define PENGOL_IMPL
 #include <utils/pl_gl.h>
 
-#include <gl/GLU.h>
-
-#pragma comment(lib, "glu32")
-
 // utility functions
 
 static inline void load(GLenum mode, mat4 m)
