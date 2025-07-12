@@ -9,6 +9,7 @@ static WindowId window;
 static RenderContextId rc;
 
 static ResourceId vb;
+static ResourceId tx;
 
 static inline void loop()
 {
@@ -102,11 +103,15 @@ static inline void loop()
 
 	begin_3d(rc);
 
+	use(tx);
 	render(vb, rotate_x(radians(90.0f)));
+
+	use(tx);
 	render(vb, rotate_x(radians(90.0f)) * translate(5.0f));
 	
 	end_3d();
 
+	use(tx);
 	render(vb, identity());
 
 	end();
@@ -136,6 +141,15 @@ static inline void entry()
 	};
 
 	vb = create_vertex_buffer(vertices, count_of(vertices));
+
+	{
+		static constexpr uint8_t data[] =
+		{
+			#embed "../res/true.dxt5"
+		};
+
+		tx = create_texture(128, 128, data, count_of(data), TEXTURE_FORMAT_DXT5);
+	}
 
 	while (is_open(window))
 	{	

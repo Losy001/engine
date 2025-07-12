@@ -2619,13 +2619,14 @@ static inline void pl_load_gl();
 
 #ifdef PENGOL_IMPL
 
+static PFNGLTEXPARAMETERIPROC pl_glTexParameteri;
+static PFNGLTEXIMAGE2DPROC pl_glTexImage2D;
 static PFNGLCLEARPROC pl_glClear;
 static PFNGLCLEARCOLORPROC pl_glClearColor;
 static PFNGLCLEARDEPTHPROC pl_glClearDepth;
 static PFNGLENABLEPROC pl_glEnable;
 static PFNGLBLENDFUNCPROC pl_glBlendFunc;
 static PFNGLDEPTHFUNCPROC pl_glDepthFunc;
-static PFNGLGETERRORPROC pl_glGetError;
 static PFNGLVIEWPORTPROC pl_glViewport;
 static PFNGLLOADMATRIXFPROC pl_glLoadMatrixf;
 static PFNGLMATRIXMODEPROC pl_glMatrixMode;
@@ -2634,10 +2635,12 @@ static PFNGLPUSHMATRIXPROC pl_glPushMatrix;
 static PFNGLDRAWARRAYSPROC pl_glDrawArrays;
 static PFNGLDRAWELEMENTSPROC pl_glDrawElements;
 static PFNGLBINDTEXTUREPROC pl_glBindTexture;
+static PFNGLGENTEXTURESPROC pl_glGenTextures;
 static PFNGLDISABLECLIENTSTATEPROC pl_glDisableClientState;
 static PFNGLENABLECLIENTSTATEPROC pl_glEnableClientState;
 static PFNGLTEXCOORDPOINTERPROC pl_glTexCoordPointer;
 static PFNGLVERTEXPOINTERPROC pl_glVertexPointer;
+static PFNGLCOMPRESSEDTEXIMAGE2DPROC pl_glCompressedTexImage2D;
 static PFNGLBINDBUFFERPROC pl_glBindBuffer;
 static PFNGLGENBUFFERSPROC pl_glGenBuffers;
 static PFNGLBUFFERDATAPROC pl_glBufferData;
@@ -2666,13 +2669,14 @@ static inline void pl_load_gl()
 		_pl_get_proc_address = (PFNGLGETPROCADDRESSPROC)GetProcAddress(_pl_gl_lib, "wglGetProcAddress");
 	#endif
 
+	pl_glTexParameteri = (PFNGLTEXPARAMETERIPROC)pl_get_proc_address("glTexParameteri");
+	pl_glTexImage2D = (PFNGLTEXIMAGE2DPROC)pl_get_proc_address("glTexImage2D");
 	pl_glClear = (PFNGLCLEARPROC)pl_get_proc_address("glClear");
 	pl_glClearColor = (PFNGLCLEARCOLORPROC)pl_get_proc_address("glClearColor");
 	pl_glClearDepth = (PFNGLCLEARDEPTHPROC)pl_get_proc_address("glClearDepth");
 	pl_glEnable = (PFNGLENABLEPROC)pl_get_proc_address("glEnable");
 	pl_glBlendFunc = (PFNGLBLENDFUNCPROC)pl_get_proc_address("glBlendFunc");
 	pl_glDepthFunc = (PFNGLDEPTHFUNCPROC)pl_get_proc_address("glDepthFunc");
-	pl_glGetError = (PFNGLGETERRORPROC)pl_get_proc_address("glGetError");
 	pl_glViewport = (PFNGLVIEWPORTPROC)pl_get_proc_address("glViewport");
 	pl_glLoadMatrixf = (PFNGLLOADMATRIXFPROC)pl_get_proc_address("glLoadMatrixf");
 	pl_glMatrixMode = (PFNGLMATRIXMODEPROC)pl_get_proc_address("glMatrixMode");
@@ -2681,10 +2685,12 @@ static inline void pl_load_gl()
 	pl_glDrawArrays = (PFNGLDRAWARRAYSPROC)pl_get_proc_address("glDrawArrays");
 	pl_glDrawElements = (PFNGLDRAWELEMENTSPROC)pl_get_proc_address("glDrawElements");
 	pl_glBindTexture = (PFNGLBINDTEXTUREPROC)pl_get_proc_address("glBindTexture");
+	pl_glGenTextures = (PFNGLGENTEXTURESPROC)pl_get_proc_address("glGenTextures");
 	pl_glDisableClientState = (PFNGLDISABLECLIENTSTATEPROC)pl_get_proc_address("glDisableClientState");
 	pl_glEnableClientState = (PFNGLENABLECLIENTSTATEPROC)pl_get_proc_address("glEnableClientState");
 	pl_glTexCoordPointer = (PFNGLTEXCOORDPOINTERPROC)pl_get_proc_address("glTexCoordPointer");
 	pl_glVertexPointer = (PFNGLVERTEXPOINTERPROC)pl_get_proc_address("glVertexPointer");
+	pl_glCompressedTexImage2D = (PFNGLCOMPRESSEDTEXIMAGE2DPROC)pl_get_proc_address("glCompressedTexImage2D");
 	pl_glBindBuffer = (PFNGLBINDBUFFERPROC)pl_get_proc_address("glBindBuffer");
 	pl_glGenBuffers = (PFNGLGENBUFFERSPROC)pl_get_proc_address("glGenBuffers");
 	pl_glBufferData = (PFNGLBUFFERDATAPROC)pl_get_proc_address("glBufferData");

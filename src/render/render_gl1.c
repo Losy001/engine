@@ -80,10 +80,47 @@ static inline ResourceId create_index_buffer(uint32_t* indices, size_t count)
 	return id;
 }
 
-[[clang::overloadable]]
-static inline ResourceId create_texture(uint16_t width, uint16_t height, uint32_t* data)
+static constexpr uint16_t MAX_TEXTURES = 512;
+
+typedef struct 
 {
-	//TODO
+	uint32_t id;
+	u16vec2 size;
+} Texture;
+
+static FreeList(Texture, MAX_TEXTURES) textures = fl_default();
+
+[[clang::overloadable]]
+static inline ResourceId create_texture(uint16_t width, uint16_t height, const uint8_t* data, size_t size, TextureFormat format)
+{
+	ResourceId id = fl_push(&textures, (Texture){});
+	Texture* t = fl_get(&textures, id);
+
+	t->size = (u16vec2){ width, height };
+
+	glGenTextures(1, &t->id);
+	glBindTexture(GL_TEXTURE_2D, t->id);
+
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);	
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
+
+	switch (format) 
+	{
+		case TEXTURE_FORMAT_RGBA:
+		{
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+		} break;
+
+		case TEXTURE_FORMAT_DXT5:
+		{
+			// GL_COMPRESSED_RGBA_S3TC_DXT5_EXT = 0x83F3
+			glCompressedTexImage2D(GL_TEXTURE_2D, 0, 0x83F3, width, height, 0, size, data);
+		} break;
+	}
+
+	return id;
 }
 
 // context
@@ -169,9 +206,10 @@ static inline void clear_background(vec4 color)
 }
 
 [[clang::overloadable]]
-static inline void bind_texture(ResourceId texture)
+static inline void use(ResourceId texture)
 {
-	//glBindTexture(GL_TEXTURE_2D, fl_get(&textures, texture)->id);
+	glEnable(GL_TEXTURE_2D);
+	glBindTexture(GL_TEXTURE_2D, fl_get(&textures, texture)->id);
 }
 
 [[clang::overloadable]]

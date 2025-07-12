@@ -20,8 +20,14 @@ static inline ResourceId create_vertex_buffer(Vertex* vertices, size_t count);
 [[clang::overloadable]]
 static inline ResourceId create_index_buffer(uint32_t* indices, size_t count);
 
+typedef enum 
+{
+	TEXTURE_FORMAT_RGBA,
+	TEXTURE_FORMAT_DXT5
+} TextureFormat;
+
 [[clang::overloadable]]
-static inline ResourceId create_texture(uint16_t width, uint16_t height, uint32_t* data);
+static inline ResourceId create_texture(uint16_t width, uint16_t height, const uint8_t* data, size_t size, TextureFormat format);
 
 // context 
 
@@ -44,7 +50,7 @@ static inline void destroy_context(RenderContextId render_context);
 static inline void clear_background(vec4 color);
 
 [[clang::overloadable]]
-static inline void bind_texture(ResourceId texture);
+static inline void use(ResourceId texture);
 
 [[clang::overloadable]]
 static inline void begin(RenderContextId render_context);
